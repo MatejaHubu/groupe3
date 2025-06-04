@@ -1,53 +1,42 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exemple de Page HTML</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
-    header, footer {
-      background-color: #333;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
-    main {
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    h1 {
-      color: #333;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ToDoList+ Augmentée</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <h1>📝 ToDoList+ Augmentée</h1>
 
-  <header>
-    <h1>Bienvenue sur ma page</h1>
-  </header>
+  <form id="taskForm">
+    <h2>Ajouter une tache Manuellement</h2>
+    <input type="text" id="taskTitle" placeholder="Titre de la tâche" required />
+    <textarea id="taskDesc" placeholder="Description (facultatif)"></textarea>
+    <div id="aiSuggestion" style="margin-top: 1rem; color: #555;"></div>
 
-  <main>
-    <h2>À propos</h2>
-    <p>Ceci est un exemple de page HTML simple. Elle contient un en-tête, un contenu principal et un pied de page.</p>
+    
+    <label for="charge">Charge mentale :</label>
+    <input type="range" id="charge" min="1" max="5" value="3" />
+    
+    <button type="submit">Ajouter tâche</button>
+    <button type="button" onclick="startVoiceInput()">🎙️ Dicter</button>
+  </form>
+  <!-- <form id="iaForm"> -->
+    <div class="iaPrompt">
+        <h2>Ajouter des tâches avec l'IA</h2>
+        <input type="text" id="iaPrompt" placeholder="Ecrivez à l'IA pour créer une liste de tâches" required />
+        
+        <button type="button" id="iaButton">Générer des tâches</button>
+        <button type="button" onclick="startVoiceInput()">🎙️ Dicter</button>
+  <!-- </form> -->
+    </div>
 
-    <h2>Fonctionnalités</h2>
-    <ul>
-      <li>Structure HTML de base</li>
-      <li>Styles CSS intégrés</li>
-      <li>Responsive sur mobile</li>
-    </ul>
-  </main>
+  <section id="taskList"></section>
 
-  <footer>
-    &copy; 2025 - MonSiteExemple.fr
-  </footer>
+  <button onclick="exportTasks()">📤 Exporter en JSON</button>
 
+  <script src="script.js"></script>
+  <script src="ia.js"></script>
 </body>
 </html>
