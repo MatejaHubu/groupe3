@@ -1,0 +1,37 @@
+name: Deploy Groupe 3 to VPS
+
+on:
+  push:
+    branches:
+      - main  # Déclenche le déploiement à chaque push sur "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 📦 Déploiement des fichiers sur le VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "./*"
+          target: "/home/debian/groupe3"
+
+      - name: 🚀 Redémarrage de l'API backend
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/debian/groupe3/backend
+            if command -v pm2 >/dev/null 2>&1; then
+              pm2 restart groupe3 || pm2 start app.js --name groupe3
+            else
+              nohup node app.js &
+            fi
