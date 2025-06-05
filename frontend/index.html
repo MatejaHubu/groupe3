@@ -20,7 +20,7 @@
     <input type="range" id="charge" min="1" max="5" value="3" />
     
     <button type="submit">Ajouter tâche</button>
-    <button type="button" onclick="startVoiceInput()">🎙️ Dicter</button>
+    <button type="button" onclick="startVoiceInput('taskTitle')">🎙️ Dicter</button>
   </form>
   <!-- <form id="iaForm"> -->
     <div class="iaPrompt">
@@ -28,7 +28,7 @@
         <input type="text" id="iaPrompt" placeholder="Ecrivez à l'IA pour créer une liste de tâches" required />
         
         <button type="button" id="iaButton">Générer des tâches</button>
-        <button type="button" onclick="startVoiceInput()">🎙️ Dicter</button>
+        <button type="button" onclick="startVoiceInput('iaPrompt')">🎙️ Dicter</button>
   <!-- </form> -->
     </div>
 

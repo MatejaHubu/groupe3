@@ -98,12 +98,12 @@ function exportTasks() {
 }
 
 // 🎙️ Web Speech API
-function startVoiceInput() {
+function startVoiceInput(composant) {
   const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
   recognition.lang = "fr-FR";
   recognition.onresult = function (event) {
     const text = event.results[0][0].transcript;
-    document.getElementById("taskTitle").value = text;
+    document.getElementById(composant).value = text;
   };
   recognition.start();
 }
