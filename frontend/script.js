@@ -1,6 +1,9 @@
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 let taskEditingId = null; // 🔁 Si on édite une tâche
 
+const API_URL = 'https://api.mistral.ai/v1/chat/completions';
+const API_KEY = 'fWurjXt4w5Zte3bn1kuOfibKqIWzLsw2';  // Remplace par ta vraie clé API
+
 
 document.getElementById("taskForm").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -41,6 +44,10 @@ function saveAndRender() {
 function renderTasks() {
   const list = document.getElementById("taskList");
   list.innerHTML = "";
+
+  console.log("Type de tasks :", typeof tasks, tasks);
+  console.log("Est un tableau :", Array.isArray(tasks));
+
   tasks.forEach(task => {
     const div = document.createElement("div");
     div.className = `task charge-${task.charge}`;
@@ -150,6 +157,82 @@ document.getElementById("taskDesc").addEventListener("input", () => {
     document.getElementById("taskDesc").value
   );
 });
+
+
+const headers = {
+  'Authorization': `Bearer ${API_KEY}`,
+  'Content-Type': 'application/json',
+};
+
+
+ document.getElementById('iaButton').addEventListener('click', async () => {
+       const prompt = document.getElementById('iaPrompt').value;
+
+      try {
+        const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'devstral-small-2505',
+            messages: [
+              { role: 'user', content:    
+                
+                `Voici un exemple de tache que j'intègre dans mon site web:
+                [
+                    {
+                        "id": "e369f1c2-aee5-4743-b997-45395ced31f1",
+                        "title": "Titre de la tâche",
+                        "desc": "Description de la tâche",
+                        "charge": 3, // Nombre entre 1 et 5 selon la difficulté de la tache
+                        "status": "à faire" // à faire ou fait
+                    }
+                ]
+                
+                génére moi les tâches en suivant le code exemple, pour ce projet: ${prompt}
+                
+                Génère uniquement un tableau JSON **conforme** à cet exemple, sans indentation, sans texte autour, sans 'json', sans commentaires :
+                ` }
+            ],
+            temperature: 0.7
+          }),
+        });
+
+        const data = await response.json();
+        let jsonText = data.choices[0].message.content.trim();
+        jsonText = jsonText.replace(/\n/g, '').replace(/\r/g, '').trim();
+        if (jsonText.startsWith('"') && jsonText.endsWith('"')) {
+        // on enlève les guillemets et on remplace les échappements internes
+        jsonText = jsonText.slice(1, -1).replace(/\\"/g, '"');
+        }
+        console.log(jsonText);
+        // document.getElementById('taskList').innerHTML += data.choices[0].message.content;
+        let newTasks = JSON.parse(jsonText); // ✅ On transforme le JSON reçu en tableau
+       
+        try {
+            const parsed = JSON.parse(jsonText);
+
+            // Si c’est un tableau, on l’utilise tel quel
+            if (Array.isArray(parsed)) {
+                newTasks = parsed;
+            } else {
+                // Sinon on l’encapsule dans un tableau
+                newTasks = [parsed];
+            }
+
+            tasks = tasks.concat(newTasks);
+            saveAndRender();
+
+        } catch (e) {
+        console.error("❌ Erreur lors du JSON.parse : ", e);
+        console.log("🔍 Contenu reçu (potentiellement mal formé) :", jsonText);
+        }
+      } catch (err) {
+        console.log('Erreur : ' + err.message);
+      }
+    });
 
 
 

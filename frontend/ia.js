@@ -34,7 +34,7 @@ const headers = {
                 
                 génére moi les tâches en suivant le code exemple, pour ce projet: ${prompt}
                 
-                Ecrit juste le CODE, pas d'intoduction, pas de conclusion, pas de titres juste le CODE
+                Ecrit juste le CODE, pas d'intoduction, pas de conclusion, pas de titres, juste le CODE
                 ` }
             ],
             temperature: 0.7
@@ -43,7 +43,7 @@ const headers = {
 
         const data = await response.json();
         console.log(data.choices[0].message.content);
-        document.getElementById('taskList').appendChild()
+        document.getElementById('taskList').innerHTML += data.choices[0].message.content;
       } catch (err) {
         console.log('Erreur : ' + err.message);
       }
