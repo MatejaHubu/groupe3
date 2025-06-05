@@ -47,7 +47,7 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
   const description = document.getElementById("taskDesc").value;
   const charge = parseInt(document.getElementById("charge").value);
 
-  if (taskEditingId) {
+  if (editingId) {
     // Mode édition
     const task = tasks.find(t => t.id === taskEditingId);
     task.titre = titre;
