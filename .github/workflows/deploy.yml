@@ -13,21 +13,22 @@ jobs:
       - name: 📥 Récupération du code
         uses: actions/checkout@v4
 
-      - name: 📦 Déploiement des fichiers sur le VPS
-        uses: appleboy/scp-action@v0.1.5
-        with:
-          host: ${{ secrets.VPS_IP }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "./*"
-          target: "/home/debian/groupe3"
+      - name: 📦 Synchronisation avec rsync (via SSH)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync sshpass
+
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ \
+            ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:/home/debian/groupe3/
 
       - name: 🚀 Redémarrage de l'API backend
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /home/debian/groupe3/backend
             if command -v pm2 >/dev/null 2>&1; then
