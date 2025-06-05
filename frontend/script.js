@@ -45,8 +45,8 @@ function renderTasks() {
   const list = document.getElementById("taskList");
   list.innerHTML = "";
 
-  console.log("Type de tasks :", typeof tasks, tasks);
-  console.log("Est un tableau :", Array.isArray(tasks));
+  // console.log("Type de tasks :", typeof tasks, tasks);
+  // console.log("Est un tableau :", Array.isArray(tasks));
 
   tasks.forEach(task => {
     const div = document.createElement("div");
@@ -207,7 +207,7 @@ const headers = {
         // on enlève les guillemets et on remplace les échappements internes
         jsonText = jsonText.slice(1, -1).replace(/\\"/g, '"');
         }
-        console.log(jsonText);
+        // console.log(jsonText);
         // document.getElementById('taskList').innerHTML += data.choices[0].message.content;
         let newTasks = JSON.parse(jsonText); // ✅ On transforme le JSON reçu en tableau
        
@@ -227,10 +227,10 @@ const headers = {
 
         } catch (e) {
         console.error("❌ Erreur lors du JSON.parse : ", e);
-        console.log("🔍 Contenu reçu (potentiellement mal formé) :", jsonText);
+        // console.log("🔍 Contenu reçu (potentiellement mal formé) :", jsonText);
         }
       } catch (err) {
-        console.log('Erreur : ' + err.message);
+        // console.log('Erreur : ' + err.message);
       }
     });
 
