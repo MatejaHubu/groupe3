@@ -2,7 +2,7 @@ let tasks = [];
 let editingId = null; // 🔁 Si on édite une tâche
 
 const API_URL = 'https://api.mistral.ai/v1/chat/completions';
-const API_URL_BDD = "https://152.228.134.45:3000/groupe3/api/taches";
+const API_URL_BDD = "https://152.228.134.45/groupe3/api/taches";
 const API_KEY = 'fWurjXt4w5Zte3bn1kuOfibKqIWzLsw2';  // Remplace par ta vraie clé API
 
 
