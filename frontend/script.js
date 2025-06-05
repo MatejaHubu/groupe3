@@ -1,21 +1,57 @@
-let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-let taskEditingId = null; // 🔁 Si on édite une tâche
+let tasks = [];
+let editingId = null; // 🔁 Si on édite une tâche
 
 const API_URL = 'https://api.mistral.ai/v1/chat/completions';
+const API_URL_BDD = "http://localhost:3000/api/taches";
 const API_KEY = 'fWurjXt4w5Zte3bn1kuOfibKqIWzLsw2';  // Remplace par ta vraie clé API
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasks();
+
+  document.getElementById("taskForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const titre = document.getElementById("taskTitle").value;
+    const description = document.getElementById("taskDesc").value;
+    const charge = parseInt(document.getElementById("charge").value);
+
+    const task = {
+      id: editingId || crypto.randomUUID(),
+      titre,
+      description,
+      charge,
+      statut: "à faire"
+    };
+
+    if (editingId) {
+      updateTask(task);
+    } else {
+      createTask(task);
+    }
+
+    this.reset();
+    editingId = null;
+    this.querySelector("button[type='submit']").textContent = "Ajouter tâche";
+  });
+});
+
+
+
+
 
 
 document.getElementById("taskForm").addEventListener("submit", function (e) {
   e.preventDefault();
-  const title = document.getElementById("taskTitle").value;
-  const desc = document.getElementById("taskDesc").value;
+  const titre = document.getElementById("taskTitle").value;
+  const description = document.getElementById("taskDesc").value;
   const charge = parseInt(document.getElementById("charge").value);
 
   if (taskEditingId) {
     // Mode édition
     const task = tasks.find(t => t.id === taskEditingId);
-    task.title = title;
-    task.desc = desc;
+    task.titre = titre;
+    task.description = description;
     task.charge = charge;
     taskEditingId = null;
     this.querySelector("button[type='submit']").textContent = "Ajouter tâche";
@@ -23,12 +59,12 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
     // Nouvelle tâche
     const task = {
       id: crypto.randomUUID(),
-      title,
-      desc,
+      titre,
+      description,
       charge,
-      status: "à faire"
+      statut: "à faire"
     };
-    tasks.push(task);
+    insertTache(task);
   }
 
   saveAndRender();
@@ -37,24 +73,72 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
 
 
 function saveAndRender() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  renderTasks();
+  loadTasks(() => {
+    renderTasks();
+  });
+}
+
+function loadTasks() {
+  fetch(API_URL_BDD)
+    .then(res => res.json())
+    .then(data => {
+      tasks = data;
+      renderTasks();
+    })
+    .catch(err => console.error("Erreur de chargement :", err));
+}
+
+function createTask(task) {
+  fetch(API_URL_BDD, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task)
+  })
+    .then(() => loadTasks())
+    .catch(err => console.error("Erreur d'ajout :", err));
+}
+
+function updateTask(task) {
+  fetch(`${API_URL_BDD}/${task.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task)
+  })
+    .then(() => loadTasks())
+    .catch(err => console.error("Erreur de mise à jour :", err));
+}
+
+function deleteTask(id) {
+  fetch(`${API_URL_BDD}/${id}`, {
+    method: "DELETE"
+  })
+    .then(() => loadTasks())
+    .catch(err => console.error("Erreur de suppression :", err));
+}
+
+function editTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  document.getElementById("taskTitle").value = task.titre;
+  document.getElementById("taskDesc").value = task.description;
+  document.getElementById("charge").value = task.charge;
+
+  editingId = task.id;
+  document.querySelector("#taskForm button[type='submit']").textContent = "Modifier tâche";
 }
 
 function renderTasks() {
   const list = document.getElementById("taskList");
   list.innerHTML = "";
 
-  // console.log("Type de tasks :", typeof tasks, tasks);
-  // console.log("Est un tableau :", Array.isArray(tasks));
-
   tasks.forEach(task => {
     const div = document.createElement("div");
     div.className = `task charge-${task.charge}`;
     div.innerHTML = `
     ${getChargeTag(task.charge)}
-    <h3>${task.title}</h3>
-    <p>${task.desc}</p>
+    <h3>${task.titre}</h3>
+    <p>${task.description}</p>
     <button onclick="editTask('${task.id}')">✏️ Modifier</button>
     <button onclick="deleteTask('${task.id}')">❌ Supprimer</button>
     `;
@@ -63,10 +147,8 @@ function renderTasks() {
   });
 }
 
-function deleteTask(id) {
-  tasks = tasks.filter(task => task.id !== id);
-  saveAndRender();
-}
+
+
 
 function getChargeEmoji(charge) {
   switch(charge) {
@@ -108,17 +190,7 @@ function startVoiceInput(composant) {
   recognition.start();
 }
 
-function editTask(id) {
-  const task = tasks.find(t => t.id === id);
-  if (!task) return;
 
-  document.getElementById("taskTitle").value = task.title;
-  document.getElementById("taskDesc").value = task.desc;
-  document.getElementById("charge").value = task.charge;
-
-  taskEditingId = id;
-  document.querySelector("#taskForm button[type='submit']").textContent = "Mettre à jour";
-}
 
 function analyseTaskAI(titre, desc) {
   const suggestionDiv = document.getElementById("aiSuggestion");
@@ -184,10 +256,10 @@ const headers = {
                 [
                     {
                         "id": "e369f1c2-aee5-4743-b997-45395ced31f1",
-                        "title": "Titre de la tâche",
-                        "desc": "Description de la tâche",
+                        "titre": "Titre de la tâche",
+                        "description": "Description de la tâche",
                         "charge": 3, // Nombre entre 1 et 5 selon la difficulté de la tache
-                        "status": "à faire" // à faire ou fait
+                        "statut": "à faire" // à faire ou fait
                     }
                 ]
                 
@@ -204,11 +276,8 @@ const headers = {
         let jsonText = data.choices[0].message.content.trim();
         jsonText = jsonText.replace(/\n/g, '').replace(/\r/g, '').trim();
         if (jsonText.startsWith('"') && jsonText.endsWith('"')) {
-        // on enlève les guillemets et on remplace les échappements internes
         jsonText = jsonText.slice(1, -1).replace(/\\"/g, '"');
         }
-        // console.log(jsonText);
-        // document.getElementById('taskList').innerHTML += data.choices[0].message.content;
         let newTasks = JSON.parse(jsonText); // ✅ On transforme le JSON reçu en tableau
        
         try {
@@ -222,7 +291,11 @@ const headers = {
                 newTasks = [parsed];
             }
 
-            tasks = tasks.concat(newTasks);
+            newTasks.forEach(task => {
+              createTask(task);
+              
+            });
+            // tasks = tasks.concat(newTasks);
             saveAndRender();
 
         } catch (e) {
