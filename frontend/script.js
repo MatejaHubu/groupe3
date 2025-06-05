@@ -64,7 +64,7 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
       charge,
       statut: "à faire"
     };
-    insertTache(task);
+    createTask(task);
   }
 
   saveAndRender();
